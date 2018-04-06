@@ -1,5 +1,5 @@
 FROM centos:latest
-MAINTAINER "orion" <orion@thoughtspot.com>
+MAINTAINER "wirter" <praveshsailor@gmail.com>
 
 # Steps needed to use systemd enabled docker containers.
 # Reference: https://hub.docker.com/_/centos/
@@ -32,8 +32,9 @@ RUN systemctl enable postgresql-9.6
 RUN echo "host all  all    0.0.0.0/0  trust" >> /var/lib/pgsql/9.6/data/pg_hba.conf
 RUN echo "listen_addresses='*'" >> /var/lib/pgsql/9.6/data/postgresql.conf
 COPY ./postgresql96-setup /usr/pgsql-9.6/bin/postgresql96-setup
+
 WORKDIR /var/lib/pgsql
-#USER postgres
+
 #CMD /bin/bash /usr/pgsql-9.6/bin/postgresql96-setup initdb
 RUN rm -rf /var/lib/pgsql/9.6/data/*
 RUN /bin/bash /usr/pgsql-9.6/bin/postgresql96-setup initdb
