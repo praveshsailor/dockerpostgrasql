@@ -14,22 +14,21 @@ RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
     rm -f /lib/systemd/system/basic.target.wants/*;\
     rm -f /lib/systemd/system/anaconda.target.wants/*;
 
-RUN yum install -y glibc-common && yum clean all
-RUN yum -y install systemd; yum clean all
+RUN yum install -y glibc-common systemd  sudo epel-release && yum clean all
 
-# Locale.  Needed for postgres.
-# Centos does not have locale-gen, the equivalent command is localedef.
+
+# Locale.  Needed for postgres. Centos does not have locale-gen, the equivalent command is localedef.
 RUN localedef -c -f UTF-8 -i en_US en_US.UTF-8
 RUN localedef -c -f UTF-8 -i ja_JP ja_JP.UTF-8
 RUN localedef -c -f UTF-8 -i de_DE de_DE.UTF-8
 RUN localedef -c -f UTF-8 -i af_ZA af_ZA.UTF-8
+
 VOLUME /run /tmp
 EXPOSE 22
-RUN yum -y install sudo epel-release; yum clean all
 # Install pgdg repo for getting new postgres RPMs
 RUN rpm -Uvh https://yum.postgresql.org/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
 # Install Postgres Version 9.6
-RUN yum -y install postgresql96-server postgresql96
+RUN yum -y install postgresql96-server postgresql96 && yum clean all
 RUN systemctl enable postgresql-9.6
 RUN echo "host all  all    0.0.0.0/0  trust" >> /var/lib/pgsql/9.6/data/pg_hba.conf
 RUN echo "listen_addresses='*'" >> /var/lib/pgsql/9.6/data/postgresql.conf
@@ -38,17 +37,17 @@ RUN echo "listen_addresses='*'" >> /var/lib/pgsql/9.6/data/postgresql.conf
 COPY ./postgresql96-setup /usr/pgsql-9.6/bin/postgresql96-setup
 
 #Modify perms on setup script
-RUN chmod +x /usr/pgsql-9.4/bin/postgresql94-setup
+RUN chmod +x /usr/pgsql-9.6/bin/postgresql96-setup
 
 #WORKING DIR
 WORKDIR /var/lib/pgsql
-
 RUN rm -rf /var/lib/pgsql/9.6/data/*
-
+# Update data folder perms
+RUN chown -R postgres.postgres /var/lib/pgsql
 #Initialize data for pg engine
 RUN /bin/bash /usr/pgsql-9.6/bin/postgresql96-setup initdb
 
 EXPOSE 5432
-#VOLUME  ["/var/lib/pgsql/9.6/data"]
+VOLUME  ["/var/lib/pgsql/9.6/data"]
 CMD ["/usr/sbin/init"]
 
