@@ -1,4 +1,4 @@
-FROM centos:latest
+#FROM centos:latest
 MAINTAINER "wirter" <praveshsailor@gmail.com>
 
 # Steps needed to use systemd enabled docker containers.
